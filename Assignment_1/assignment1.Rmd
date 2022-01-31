@@ -1,0 +1,104 @@
+---
+title: "Assignment1"
+author: "Lava"
+date: "1/29/2022"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+
+```{echo=FALSE}
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+##******Assignment 1 *********
+```{r}
+#getwd() is used to know the current working directory
+getwd()
+#setwd() is used to set the working directory as per our requirement
+setwd("C:/Users/lavak/OneDrive/Documents/R")
+```
+```{r}
+##Reference:https://www.kaggle.com/rupakroy/credit-data/version/1
+##the data set csv file credit_data.csv is downloaded from site:https://www.kaggle.com/rupakroy/credit-data/version/1 and imported to the present working directory "C:/Users/lavak/OneDrive/Documents/R"
+library(readr)
+credit_data <- read_csv("credit_data.csv") ##variable is assigned to store the data from credit_data.csv
+##read_csv is used to read the data set
+View(credit_data) ##To view the entries in the data set 
+```
+```{r}
+#To display the data of credit_data file  
+credit_data
+```
+
+```{r}
+##Summary function is used to calculate the descriptive statistics like median, mean, min and max for given variables.
+##Here clientid, income, age, loan, default are variables of credit_data data set
+summary(credit_data $income)
+summary(credit_data $clientid)
+summary(credit_data $age)
+summary(credit_data $loan)
+summary(credit_data $default)
+```
+#Discriptive statistics 
+```{r}
+library(fBasics)        ##To load the library fBasics
+options(scipen =999)    ##To convert all values to decimal
+#basicStats function is used to calculate the descriptive statistics like median, mean, min and max for given variables.
+basicStats(credit_data $income)
+basicStats(credit_data $clientid)
+basicStats(credit_data $age)
+basicStats(credit_data $loan)
+basicStats(credit_data $default)
+```
+```{r}
+#Different type of operations are done on the variables
+mean(credit_data $income)        ##To calculate the mean
+sd(credit_data $clientid)        ##To calculate the standard deviation
+max(credit_data $loan)           ##To calculate the minimum value in the specific variable data
+min(credit_data $income)
+log(credit_data $loan)           ##To transform the data into log
+max(credit_data $clientid)       ##To calculate the maximum value in the specific variable data
+```
+
+```{r}
+#Here the transormations of ztransform and maxvalue have been performed. 
+ztransformed <- credit_data $income - mean(credit_data $income)/sd(credit_data $income) 
+ztransformed
+maxvalue <- max(credit_data $income) - max(credit_data $loan)
+maxvalue
+```
+```{r}
+##Plot() function used for plotting the values of variables clientid, income, age, loan, default
+plot(credit_data $clientid)
+plot(credit_data $income)
+plot(credit_data $age)
+plot(credit_data $loan)
+plot(credit_data $default)
+```
+```{r}
+##Plot() function used for plotting the data set credit_data
+plot(credit_data)
+```
+
+
+```{r}
+##plot() function can also be used for scattered plot for variables clientid, income and loan
+plot(credit_data $clientid, credit_data $income)
+plot(credit_data $income,credit_data $loan)
+##Below libraries are used getting the output as PDF while knitting for output
+library(tinytex)      
+library(latexpdf)
+```
