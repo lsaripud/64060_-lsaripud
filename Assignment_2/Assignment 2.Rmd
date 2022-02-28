@@ -1,0 +1,141 @@
+---
+title: "Assignment 2"
+author: "lava kumar"
+date: "2/17/2022"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r}
+#First load the all the required packages using library for smooth execution.
+library('caret')
+library('ISLR')
+library('dplyr')
+library('class')
+library(readr)
+library(gmodels)
+library(FNN)
+```
+
+
+```{r}
+#To import the UniversalBank.csv file
+Universal_Bank <- read.csv("C:/Users/lavak/Documents/R/Assignment2/UniversalBank.csv")
+colnames(Universal_Bank)    #for displaying the column names
+summary(Universal_Bank)
+```
+
+```{r}
+#Removing columns ID and ZIP.Code  as per the Question instruction by assigning them to NULL
+Universal_Bank$ID <- NULL
+Universal_Bank$ZIP.Code <- NULL
+summary(Universal_Bank)
+
+```
+
+```{r}
+#Making the Personal Loan column as factor value
+
+Universal_Bank$Personal.Loan =  as.factor(Universal_Bank$Personal.Loan)
+
+```
+
+```{r}
+#Applying normalization to Universal_Bank dataset
+Normal_model <- preProcess(Universal_Bank,method = "range")
+Universal_Bank_Norm <- predict(Normal_model,Universal_Bank)
+summary(Universal_Bank_Norm)
+```
+
+
+```{r}
+#As per the question instructions partitioning  the data into 60% for training and 40% for testing
+
+Train_index <- createDataPartition(Universal_Bank$Personal.Loan, p = 0.6, list = FALSE)
+train.df = Universal_Bank_Norm[Train_index,]
+validation.df = Universal_Bank_Norm[-Train_index,]
+```
+
+
+```{r}
+#Task 1 classifying the customer as per the date provided in the question 1
+To_Predict = data.frame(Age = 40, Experience = 10, Income = 84, Family = 2, CCAvg = 2, Education = 1, Mortgage = 0, Securities.Account = 0, CD.Account = 0, Online = 1, CreditCard = 1)
+print(To_Predict)
+Prediction <- knn(train = train.df[,1:7], 
+                  test = To_Predict[,1:7], cl = train.df$Personal.Loan, k = 1)
+print(Prediction)
+
+#Customer is classified as 1.
+
+```
+
+```{r}
+#Task2
+
+set.seed(123)
+Universal_Bank_control <- trainControl(method= "repeatedcv", number = 3, repeats = 2)
+searchGrid = expand.grid(k=1:10)
+
+knn.model = train(Personal.Loan~., data = train.df, method = 'knn', tuneGrid = searchGrid,trControl = Universal_Bank_control)
+
+knn.model
+#The choice of K that balances between overfitting and ignoring predictor information appears as K=3
+```
+
+
+```{r}
+#Question 3
+#confusion matrix for the validation data that results from using the best k.
+
+predictions <- predict(knn.model,validation.df)
+
+confusionMatrix(predictions,validation.df$Personal.Loan)
+```
+
+
+
+```{r}
+#Question 4
+#Classify the customer using the best k
+To_Predict_Normaliz = data.frame(Age = 40, Experience = 10, Income = 84, Family = 2,
+                                 CCAvg = 2, Education = 1, Mortgage = 0,
+                                 Securities.Account =0, CD.Account = 0, Online = 1,
+                                 CreditCard = 1)
+To_Predict_Normaliz = predict(Normal_model, To_Predict)
+predict(knn.model, To_Predict_Normaliz)
+
+```
+
+
+
+```{r}
+#Question 5
+#As per the question instructions Repartition the data into 50% for training ,30%  for validation, 20% for test
+train_size = 0.5
+Train_index = createDataPartition(Universal_Bank$Personal.Loan, p = 0.5, list = FALSE)
+train.df = Universal_Bank_Norm[Train_index,]
+
+test_size = 0.2
+Test_index = createDataPartition(Universal_Bank$Personal.Loan, p = 0.2, list = FALSE)
+Test.df = Universal_Bank_Norm[Test_index,]
+
+valid_size = 0.3
+Validation_index = createDataPartition(Universal_Bank$Personal.Loan, p = 0.3, list = FALSE)
+validation.df = Universal_Bank_Norm[Validation_index,]
+
+Testingknn <- knn(train = train.df[,-8], test = Test.df[,-8], cl = train.df[,8], k =3)
+Validationknn <- knn(train = train.df[,-8], test = validation.df[,-8], cl = train.df[,8], k =3)
+Trainingknn <- knn(train = train.df[,-8], test = train.df[,-8], cl = train.df[,8], k =3)
+
+#Comparing the confusion matrix of the test set with that of the training and validation sets.
+
+confusionMatrix(Testingknn, Test.df[,8])
+confusionMatrix(Trainingknn, train.df[,8])
+confusionMatrix(Validationknn, validation.df[,8])
+
+#After comparing the date obtained from both confusion matrices. We can observe it training accuracy is slightly higher when data is splitting test data= 50.
+
+#We can also  determine that Training accuracy is slightly higher than the test and validation sets whihch means the alogorithm is working how it should.
+```
+
