@@ -1,0 +1,128 @@
+---
+title: "Assignment3"
+author: "Lava Kumar"
+date: "3/6/2022"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#Reading the UniversalBank.csv file.
+Universal_Bank <- read.csv("C:/Users/lavak/Documents/R/Assignment3/UniversalBank.csv")
+View(Universal_Bank)    #To view the data of dataset
+
+#First required libraries have to be loaded using library fuction.
+library(caret)
+library(ISLR)
+library(e1071)
+library(dplyr)
+library(class)
+library(reshape2)
+library(ggplot2)
+library(gmodels)
+library(lattice)
+
+summary(Universal_Bank)  # To check different values in the dataset
+
+#variables coversion to factor
+Universal_Bank$Personal.Loan <- as.factor(Universal_Bank$Personal.Loan)
+Universal_Bank$Online <- as.factor(Universal_Bank$Online)
+Universal_Bank$CreditCard <- as.factor(Universal_Bank$CreditCard)
+df= Universal_Bank
+
+#Partitioning the data
+set.seed(64060)
+Train_Index1 <- createDataPartition(df$Personal.Loan, p = 0.6, list = FALSE)
+Train1.df = df[Train_Index1,]
+validation.df = df[-Train_Index1,]
+
+#TASK1:Created a pivot table for the training data with Online as a #column variable, CC 
+#as a row variable, and Loan as a secondary row 
+#variable.The values inside the table conveying the count. 
+
+pitable <- xtabs(~ CreditCard + Online + Personal.Loan , data = Train1.df)
+ftable(pitable)
+
+
+#TASK2:Calculating the probability that this customer will accept #the loan offer
+
+T2Probability = 59/(59+479)
+T2Probability
+
+
+#TASK3:Creating two separate pivot tables for the training data. #One will have Loan (rows) as a 
+#function of Online (columns) and #the other will have Loan (rows) as a function of CC.
+
+table(Personal.Loan = Train1.df$Personal.Loan, Online = Train1.df$Online)
+
+table(Personal.Loan = Train1.df$Personal.Loan, CreditCard = Train1.df$CreditCard)
+table(Personal.Loan = Train1.df$Personal.Loan)
+
+#TASK4:Computing the following quantities [P(A | B) means “the probability ofA given B”]: 
+
+#i. P(CC = 1 | Loan = 1) (the proportion of credit card holders among the loan 
+#acceptors) 
+T4Probability1 <- 93/(93+195)
+T4Probability1
+
+#ii. P(Online = 1 | Loan = 1)  
+T4Probability2 <- 179/(179+109)
+T4Probability2
+
+#iii. P(Loan = 1) (the proportion of loan acceptors)  
+T4Probability3 <- 288/(288+2712)
+T4Probability3
+#iv. P(CC = 1 | Loan = 0)  
+T4Probability4 <- 788/(788+1924)
+T4Probability4
+
+#v. P(Online = 1 | Loan = 0) 
+T4Probability5 <- 1631/(1631+1081)
+T4Probability5
+
+#vi. P(Loan = 0) 
+T4Probability6 <- 2712/(2712+288)
+T4Probability6
+
+#TASK5: Using the quantities computed above 
+#to compute the naive 
+#Bayes probability P(Loan = 1 | CC = 1, Online = 1). 
+
+T5Probability <- (T4Probability1*T4Probability2*T4Probability3)/
+  ((T4Probability1*T4Probability2*T4Probability3) +(T4Probability4*T4Probability5*T4Probability6))
+
+T5Probability 
+
+#TASK6
+
+#Compare this value with the one obtained from 
+#the pivot table in
+#Task 2. Which is a more accurate estimate?
+
+#As of Task 2, the value we obtained was 0.1096654, and the value we obtained from Task 5 is 0.1087106. 
+#Unlike the exact technique, the naive Bayes method does not need to categorize independent variables 
+#before forecasting, as the exact method does. 
+#As we used the exact data from the pivot table, we 
+#can verify that the result obtained from Task 2 is more precise.
+
+#Task7
+
+#Which of the entries in this table are needed for computing P(Loan = 1 | CC = 1, Online = 1)?
+#Run naive Bayes on the data. Examine the model output on training data, and find the entry 
+#that corresponds to P(Loan = 1 | CC = 1, Online = 1). 
+#Compare this to the number you obtained in Task 5.
+
+NB.Model <- naiveBayes(Personal.Loan~ Online + CreditCard, data = Train1.df)
+To_Predict1=data.frame(Online=1, CreditCard= 1)
+predict(NB.Model, To_Predict1,type = 'raw')
+
+#We obtained the value 0.08463445 from Task 7, and the value 0.1087106 from Task 5.
+#Our results are almost identical to those obtained from Task 5 with only slight difference.
+#However,this will not impact the rank order.
+```
+
